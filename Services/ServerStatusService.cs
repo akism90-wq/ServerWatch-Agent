@@ -47,6 +47,8 @@ public sealed class ServerStatusService
                 storagePath,
                 storageWarningThresholdGb),
 
+            Downloads = downloads,
+
             Services = [.. serviceStatuses]
         };
     }
