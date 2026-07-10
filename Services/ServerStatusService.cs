@@ -7,13 +7,16 @@ public sealed class ServerStatusService
 {
     private readonly StorageService _storageService;
     private readonly ServiceHealthService _serviceHealthService;
+    private readonly QBittorrentService _qbittorrentService;
 
     public ServerStatusService(
         StorageService storageService,
-        ServiceHealthService serviceHealthService)
+        ServiceHealthService serviceHealthService,
+        QBittorrentService qbittorrentService)
     {
         _storageService = storageService;
         _serviceHealthService = serviceHealthService;
+        _qbittorrentService = qbittorrentService;
     }
 
     public async Task<ServerStatus> GetStatusAsync(
@@ -27,6 +30,9 @@ public sealed class ServerStatusService
                 service.Url));
 
         var serviceStatuses = await Task.WhenAll(serviceChecks);
+
+        var downloads =
+            await _qbittorrentService.GetDownloadStatusesAsync();
 
         return new ServerStatus
         {

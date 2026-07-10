@@ -11,4 +11,6 @@ public sealed class ServerWatchConfiguration
     public QBittorrentConfiguration QBittorrent { get; set; } = new();
 
     public List<ServiceConfiguration> Services { get; init; } = [];
+
+    public DownloadWarningConfiguration DownloadWarnings { get; set; } = new();
 }

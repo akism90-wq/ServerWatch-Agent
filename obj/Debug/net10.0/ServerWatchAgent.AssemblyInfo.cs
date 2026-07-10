@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ServerWatchAgent")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c309c0787ee2faf91ddc7a3026081571eda2e2a3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3f185632cdc5bf1533316dc8d6aeab35f20cdc59")]
 [assembly: System.Reflection.AssemblyProductAttribute("ServerWatchAgent")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ServerWatchAgent")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

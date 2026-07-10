@@ -10,9 +10,12 @@ public sealed class QBittorrentService
     private readonly QBittorrentConfiguration _configuration;
     private readonly HttpClient _httpClient;
 
+    private readonly DownloadWarningConfiguration _downloadWarnings;
+
     public QBittorrentService(ServerWatchConfiguration configuration)
     {
         _configuration = configuration.QBittorrent;
+        _downloadWarnings = configuration.DownloadWarnings;
 
         var handler = new HttpClientHandler
         {
@@ -24,7 +27,6 @@ public sealed class QBittorrentService
             BaseAddress = new Uri(_configuration.BaseUrl)
         };
     }
-
     public async Task<string> GetVersionAsync()
     {
         var loginData = new FormUrlEncodedContent(
@@ -83,15 +85,43 @@ public sealed class QBittorrentService
 
     public async Task<List<DownloadStatus>> GetDownloadStatusesAsync()
     {
-        var torrents = await GetTorrentModelsAsync();
+        var torrents = (await GetTorrentModelsAsync())
+            .Where(torrent =>
+                torrent.State is
+                    "downloading" or
+                    "forcedDL" or
+                    "stalledDL" or
+                    "queuedDL" or
+                    "metaDL" or
+                    "checkingDL" or
+                    "allocating")
+            .ToList();
 
-        return torrents.Select(torrent => new DownloadStatus
+        return torrents.Select(torrent =>
         {
-            Name = torrent.Name,
-            SizeGb = Math.Round(torrent.SizeBytes / 1024.0 / 1024.0 / 1024.0, 2),
-            ProgressPercent = (int)(torrent.Progress * 100.0),
-            State = torrent.State,
-            Suspicious = false
+            var sizeGb = Math.Round(
+                torrent.SizeBytes / 1024.0 / 1024.0 / 1024.0,
+                2);
+
+            var suspicious =
+                torrent.Category.Contains(
+                    "sonarr",
+                    StringComparison.OrdinalIgnoreCase)
+                    ? sizeGb > _downloadWarnings.TvEpisodeThresholdGb
+                    : torrent.Category.Contains(
+                        "radarr",
+                        StringComparison.OrdinalIgnoreCase)
+                        ? sizeGb > _downloadWarnings.MovieThresholdGb
+                        : false;
+
+            return new DownloadStatus
+            {
+                Name = torrent.Name,
+                SizeGb = sizeGb,
+                ProgressPercent = (int)(torrent.Progress * 100.0),
+                State = torrent.State,
+                Suspicious = suspicious
+            };
         }).ToList();
     }
 }
