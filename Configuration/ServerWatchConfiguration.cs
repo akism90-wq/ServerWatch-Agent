@@ -8,5 +8,7 @@ public sealed class ServerWatchConfiguration
 
     public double StorageWarningThresholdGb { get; init; }
 
+    public QBittorrentConfiguration QBittorrent { get; set; } = new();
+
     public List<ServiceConfiguration> Services { get; init; } = [];
 }

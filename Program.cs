@@ -24,6 +24,7 @@ builder.Services.AddSingleton(serverWatchConfiguration);
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddSingleton<ServiceHealthService>();
 builder.Services.AddSingleton<ServerStatusService>();
+builder.Services.AddSingleton<QBittorrentService>();
 
 var app = builder.Build();
 
@@ -38,5 +39,29 @@ app.MapGet("/status", async (
 
     return Results.Ok(status);
 });
+
+app.MapGet(
+    "/qbittorrent/version",
+    async (QBittorrentService qbittorrentService) =>
+        await qbittorrentService.GetVersionAsync());
+
+app.MapGet(
+    "/qbittorrent/torrents",
+    async (QBittorrentService qbittorrentService) =>
+        Results.Content(
+            await qbittorrentService.GetTorrentsAsync(),
+            "application/json"));
+
+app.MapGet(
+    "/qbittorrent/models",
+    async (QBittorrentService qbittorrentService) =>
+        Results.Ok(
+            await qbittorrentService.GetTorrentModelsAsync()));
+
+app.MapGet(
+    "/qbittorrent/downloads",
+    async (QBittorrentService qbittorrentService) =>
+        Results.Ok(
+            await qbittorrentService.GetDownloadStatusesAsync()));
 
 app.Run();
