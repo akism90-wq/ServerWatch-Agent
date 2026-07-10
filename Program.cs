@@ -1,49 +1,40 @@
 using System.Runtime.InteropServices;
 using ServerWatchAgent.Models;
+using ServerWatchAgent.Services;
+using ServerWatchAgent.Configuration;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var storagePath =
-    builder.Configuration["ServerWatch:StoragePath"]
-    ?? throw new InvalidOperationException("ServerWatch:StoragePath is not configured.");
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(
+        new JsonStringEnumConverter());
+});
 
-var storageWarningThresholdGb =
-    builder.Configuration.GetValue<double>(
-        "ServerWatch:StorageWarningThresholdGb"
-    );
+var serverWatchConfiguration =
+    builder.Configuration
+        .GetSection("ServerWatch")
+        .Get<ServerWatchConfiguration>()
+    ?? throw new InvalidOperationException(
+        "ServerWatch configuration is missing.");
+
+builder.Services.AddSingleton(serverWatchConfiguration);
+
+builder.Services.AddSingleton<StorageService>();
+builder.Services.AddSingleton<ServiceHealthService>();
+builder.Services.AddSingleton<ServerStatusService>();
 
 var app = builder.Build();
 
-app.MapGet("/status", () =>
+app.MapGet("/status", async (
+    ServerStatusService serverStatusService,
+    ServerWatchConfiguration configuration) =>
 {
-    var drive = new DriveInfo(storagePath);
-
-    var totalBytes = drive.TotalSize;
-    var freeBytes = drive.AvailableFreeSpace;
-    var usedBytes = totalBytes - freeBytes;
-
-    var freeGb = freeBytes / 1024.0 / 1024.0 / 1024.0;
-    var usedPercent = (int)Math.Round(
-        usedBytes * 100.0 / totalBytes
-    );
-
-    var status = new ServerStatus
-    {
-        Server = new ServerInfo
-        {
-            Name = Environment.MachineName,
-            Online = true,
-            OperatingSystem = RuntimeInformation.OSDescription
-        },
-
-        Storage = new StorageStatus
-        {
-            Path = storagePath,
-            UsedPercent = usedPercent,
-            FreeGb = Math.Round(freeGb, 1),
-            Warning = freeGb < storageWarningThresholdGb
-        }
-    };
+    var status = await serverStatusService.GetStatusAsync(
+        configuration.StoragePath,
+        configuration.StorageWarningThresholdGb,
+        configuration.Services);
 
     return Results.Ok(status);
 });
