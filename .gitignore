@@ -2,8 +2,11 @@ bin/
 obj/
 publish/
 
+appsettings.json
+
 .vs/
 .idea/
 
 *.user
 *.suo
+
