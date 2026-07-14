@@ -8,6 +8,12 @@ public sealed class DownloadStatus
 
     public int ProgressPercent { get; init; }
 
+    public long DownloadSpeedBytesPerSecond { get; init; }
+
+    public long EtaSeconds { get; init; }
+
+    public double AmountLeftGb { get; init; }
+
     public string State { get; init; } = string.Empty;
 
     public bool Suspicious { get; init; }

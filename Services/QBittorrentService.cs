@@ -114,14 +114,37 @@ public sealed class QBittorrentService
                         ? sizeGb > _downloadWarnings.MovieThresholdGb
                         : false;
 
+            var amountLeftGb = Math.Round(
+                torrent.AmountLeftBytes / 1024.0 / 1024.0 / 1024.0,
+                2);
+
             return new DownloadStatus
             {
                 Name = torrent.Name,
                 SizeGb = sizeGb,
                 ProgressPercent = (int)(torrent.Progress * 100.0),
-                State = torrent.State,
+                DownloadSpeedBytesPerSecond =
+                    torrent.DownloadSpeedBytesPerSecond,
+                EtaSeconds = torrent.EtaSeconds,
+                AmountLeftGb = amountLeftGb,
+                State = GetFriendlyState(torrent.State),
                 Suspicious = suspicious
             };
         }).ToList();
+    }
+    
+    private static string GetFriendlyState(string state)
+    {
+        return state switch
+        {
+            "downloading" => "Downloading",
+            "forcedDL" => "Downloading",
+            "stalledDL" => "Stalled",
+            "queuedDL" => "Queued",
+            "metaDL" => "Fetching metadata",
+            "checkingDL" => "Checking",
+            "allocating" => "Allocating",
+            _ => state
+        };
     }
 }
