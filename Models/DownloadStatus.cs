@@ -4,6 +4,10 @@ public sealed class DownloadStatus
 {
     public string Name { get; init; } = string.Empty;
 
+    public string Title { get; init; } = string.Empty;
+
+    public string Subtitle { get; init; } = string.Empty;
+
     public double SizeGb { get; init; }
 
     public int ProgressPercent { get; init; }
