@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/deploy.local"
+
 readonly SERVER="steve@192.168.0.126"
 readonly PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly PUBLISH_DIR="${PROJECT_DIR}/publish"
@@ -50,6 +52,7 @@ curl \
     --retry-delay 1 \
     --retry-connrefused \
     --max-time 5 \
+    --header "X-ServerWatch-Api-Key: ${SERVERWATCH_RELEASE_API_KEY}" \
     "${STATUS_URL}"
 
 echo

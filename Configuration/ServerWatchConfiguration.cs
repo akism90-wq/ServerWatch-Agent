@@ -8,6 +8,8 @@ public sealed class ServerWatchConfiguration
 
     public double StorageWarningThresholdGb { get; init; }
 
+    public string ApiKey { get; init; } = string.Empty;
+
     public QBittorrentConfiguration QBittorrent { get; set; } = new();
 
     public List<ServiceConfiguration> Services { get; init; } = [];

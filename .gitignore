@@ -11,3 +11,5 @@ appsettings.json
 *.user
 *.suo
 
+
+deploy.local
